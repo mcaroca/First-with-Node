@@ -1,0 +1,57 @@
+extends layout
+
+block content
+  h1= title
+  #disconected
+    p Desconectado el servidor
+  #connected.hide
+    p Conectado al servidor
+    p Puede enviar sus datos
+    
+  h2 Agregue los valores
+  
+  label(for='producto') Nombre del producto:
+  input(type='text',name='producto',id='producto')#producto
+  label(for='encarga') Nombre del que encarga:
+  input(type='text',name='encarga',id='encarga')#encarga
+  input(type='button', value='Enviar Producto')#boton
+  input(type='button', value='Limpiar Campos')#limpiar
+  
+  h3 
+  
+  script
+    // Objeto socket que se conectará a localhost
+    var socket = io.connect('http://localhost');
+    
+    // Función que muestra un mensaje u otro, dependiendo de la conexión.
+    function toggle(){
+      $("#disconected").toggleClass("hide");
+      $("#connected").toggleClass("hide");
+    }
+    
+    function limpiar(){
+      $('#producto').val('');
+      $('#encarga').val('');
+    }
+
+    socket.on('Conectado', function () {
+      toggle();
+    });
+
+    // Si pulsas el botón, envía el evento datos
+    $('#boton').click(function(){
+      var data = $('#producto').val() +' - '+ $('#encarga').val();
+      socket.emit('datos', data);
+      alert('Producto enviado!');
+      limpiar();
+      });
+    
+    // Limpia los campos
+    $('#limpiar').click(function(){
+      limpiar();
+      });
+
+    // Si nos desconectamos, muestra el log y cambia el mensaje.
+    socket.on('disconnect', function () {
+      toggle();
+      });

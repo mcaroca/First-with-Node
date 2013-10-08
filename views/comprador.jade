@@ -1,0 +1,46 @@
+extends layout
+
+block content
+  h1= title
+  h2 Lista de Productos
+  #disconected
+    p Desconectado el servidor
+  #connected.hide
+    p Se desplegará la información
+  h3 Producto - Encargado
+  
+  section.wrapper
+    section.products     
+    
+  script
+    
+    // Objeto socket que se conectará a localhost
+    var socket = io.connect('http://localhost');
+    //Variable products para la sección products
+    var products = $('.products');
+        
+    // Función que muestra un mensaje u otro, dependiendo de la conexión.
+    function toggle(){
+      $("#disconected").toggleClass("hide");
+      $("#connected").toggleClass("hide");
+    }
+    
+    // Conectado al server
+    socket.on('Conectado', function () {
+      toggle();
+      socket.on('primera', function (data){
+        for (x=0;x<data.length;x++){
+        products.append('<p>' + data[x] + '</p>');
+      }
+      });
+    });
+    
+    //Recibe datos desde server e imprimo el ultimo valor agregado al array
+    socket.on('productos', function (data) {
+      products.append('<p>' + data[data.length-1] + '</p>');      
+    });
+    
+    // Si se cae el server, cambia el mensaje.
+    socket.on('disconnect', function () {
+      toggle();
+    });
